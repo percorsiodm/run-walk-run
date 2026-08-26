@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run Walk Run — la settimana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#EEEAE0;
+    --sand-2:#E3DDCC;
+    --pine:#1F3A2E;
+    --pine-2:#16281F;
+    --amber:#C97F2B;
+    --amber-2:#A8681F;
+    --sage:#7C8B6F;
+    --sage-2:#5F6D53;
+    --ink:#1B1B18;
+    --ink-soft:#4A4A44;
+    --white:#FFFDF8;
+    --line:rgba(27,27,24,0.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--sand);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Archivo Expanded', sans-serif;}
+  a{color:inherit;}
+
+  .wrap{max-width:720px; margin:0 auto; padding:0 20px 80px;}
+
+  header.hero{
+    background:var(--pine);
+    color:var(--sand);
+    padding:44px 20px 36px;
+    border-bottom-left-radius:28px;
+    border-bottom-right-radius:28px;
+  }
+  header.hero .inner{max-width:720px; margin:0 auto;}
+  .eyebrow{
+    font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--sage); font-weight:600; margin:0 0 6px;
+  }
+  h1{
+    font-family:'Archivo Expanded', sans-serif;
+    font-weight:800;
+    font-size:clamp(28px,7vw,38px);
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .hero p{margin:0; color:var(--sand-2); font-size:15px; max-width:46ch;}
+
+  .hero-today{
+    display:flex; align-items:center; gap:16px;
+    margin-top:26px; background:rgba(255,253,248,0.06);
+    border:1px solid rgba(255,253,248,0.14);
+    border-radius:var(--radius); padding:14px 16px;
+  }
+  .hero-today .label{font-size:12px; color:var(--sage); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;}
+  .hero-today .value{font-family:'Archivo Expanded'; font-weight:800; font-size:20px; margin-top:2px;}
+
+  svg.dial{flex-shrink:0;}
+
+  section{margin-top:40px;}
+  h2{
+    font-family:'Archivo Expanded'; font-weight:800; font-size:22px;
+    margin:0 0 4px;
+  }
+  .section-sub{color:var(--ink-soft); font-size:14px; margin:0 0 18px;}
+
+  .day{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .day-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:15px 18px; cursor:pointer; gap:12px;
+    background:none; border:none; width:100%; text-align:left;
+    font-family:inherit; color:inherit;
+  }
+  .day-head .name{font-weight:600; font-size:16px;}
+  .day-head .meta{display:flex; align-items:center; gap:10px;}
+  .tag{
+    font-size:11px; font-weight:600; letter-spacing:0.03em;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+  }
+  .tag.facile{background:#E4EEDD; color:var(--sage-2);}
+  .tag.piramide{background:#F5E6D3; color:var(--amber-2);}
+  .tag.resistenza{background:#F5DCC9; color:#8C4A1B;}
+  .tag.esercizi{background:#E6E0F2; color:#4C3D82;}
+  .tag.riposo{background:var(--sand-2); color:var(--ink-soft);}
+  .tag.sacro{background:var(--pine); color:var(--sand);}
+
+  .chevron{width:18px; height:18px; transition:transform 0.2s ease; flex-shrink:0; color:var(--ink-soft);}
+  .day.open .chevron{transform:rotate(180deg);}
+
+  .day-body{
+    max-height:0; overflow:hidden; transition:max-height 0.25s ease;
+    border-top:1px solid var(--line);
+  }
+  .day.open .day-body{max-height:400px;}
+  .day-body-inner{padding:16px 18px 18px;}
+
+  .seq{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+  .seg{
+    display:flex; align-items:center; gap:6px;
+    font-size:13px; font-weight:600;
+    padding:6px 10px; border-radius:8px;
+  }
+  .seg.walk{background:var(--sand-2); color:var(--ink-soft);}
+  .seg.run{background:#F5E6D3; color:var(--amber-2);}
+  .seg .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .seg.walk .dot{background:var(--sage);}
+  .seg.run .dot{background:var(--amber);}
+
+  .note{font-size:13px; color:var(--ink-soft); margin:10px 0 0;}
+  .total{font-size:13px; color:var(--ink-soft); margin:2px 0 0; font-weight:500;}
+
+  .exlist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:6px;}
+  .exlist li{
+    display:flex; align-items:flex-start; gap:10px;
+    font-size:14px; padding:8px 0; border-bottom:1px solid var(--line);
+  }
+  .exlist li:last-child{border-bottom:none;}
+  .exlist input[type=checkbox]{
+    width:19px; height:19px; margin-top:1px; flex-shrink:0; accent-color:var(--amber);
+  }
+  .exlist .ex-name{font-weight:600;}
+  .exlist .ex-detail{color:var(--ink-soft); display:block; font-size:13px;}
+  .exlist li.done .ex-name, .exlist li.done .ex-detail{
+    text-decoration:line-through; opacity:0.5;
+  }
+
+  .swap-note{
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; font-size:14px; color:var(--ink-soft); margin-top:14px;
+  }
+  .swap-note strong{color:var(--ink); font-weight:600;}
+
+  .legend{display:flex; gap:18px; margin:14px 0 0; font-size:12px; color:var(--ink-soft);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend .dot{width:8px; height:8px; border-radius:50%;}
+  .legend .dot.walk{background:var(--sage);}
+  .legend .dot.run{background:var(--amber);}
+
+  footer{
+    text-align:center; font-size:12px; color:var(--ink-soft);
+    margin-top:50px; padding-top:20px; border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <p class="eyebrow">Piano personale</p>
+    <h1 class="display">Run walk run — la settimana</h1>
+    <p>Cammino e corsa alternati ogni mattina, due sessioni leggere di corpo libero, un giorno intoccabile di riposo.</p>
+
+    <div class="hero-today" id="heroToday">
+      <svg class="dial" width="56" height="56" viewBox="0 0 56 56" role="img" aria-hidden="true">
+        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,253,248,0.15)" stroke-width="6"/>
+        <circle id="dialArc" cx="28" cy="28" r="24" fill="none" stroke="#C97F2B" stroke-width="6"
+          stroke-dasharray="150.8" stroke-dashoffset="40" stroke-linecap="round" transform="rotate(-90 28 28)"/>
+      </svg>
+      <div>
+        <p class="label">Oggi</p>
+        <p class="value" id="todayName">—</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section id="settimana">
+    <h2>I sette giorni</h2>
+    <p class="section-sub">Tocca un giorno per vedere la sequenza esatta di cammino e corsa.</p>
+    <div id="dayList"></div>
+    <div class="legend">
+      <span><i class="dot walk"></i>cammino</span>
+      <span><i class="dot run"></i>corsa</span>
+    </div>
+  </section>
+
+  <section id="esercizi">
+    <h2>Corpo libero — martedì o giovedì</h2>
+    <p class="section-sub">15-20 minuti, poche serie, mai a cedimento. Le spunte si resettano ogni lunedì.</p>
+
+    <div class="day open">
+      <div class="day-body" style="max-height:800px;">
+        <div class="day-body-inner">
+          <p class="note" style="margin-top:0;">Riscaldamento: 3-4' di mobilità articolare (spalle, anche, caviglie).</p>
+          <ul class="exlist" id="exList">
+            <li data-ex="plank"><input type="checkbox"><div><span class="ex-name">Plank</span><span class="ex-detail">20-30 secondi × 3, schiena piatta</span></div></li>
+            <li data-ex="flessioni"><input type="checkbox"><div><span class="ex-name">Flessioni</span><span class="ex-detail">sulle ginocchia o inclinate, 8-10 rip. × 3</span></div></li>
+            <li data-ex="squat"><input type="checkbox"><div><span class="ex-name">Squat a corpo libero</span><span class="ex-detail">12-15 rip. × 3</span></div></li>
+            <li data-ex="ponte"><input type="checkbox"><div><span class="ex-name">Ponte glutei</span><span class="ex-detail">12-15 rip. × 3</span></div></li>
+            <li data-ex="sideplank"><input type="checkbox"><div><span class="ex-name">Side plank</span><span class="ex-detail">15-20 secondi per lato × 2</span></div></li>
+            <li data-ex="stretch"><input type="checkbox"><div><span class="ex-name">Stretching finale</span><span class="ex-detail">5' su quadricipiti, polpacci, lombari</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="swap-note">
+      <strong>Regola di scambio.</strong> Fai gli esercizi solo in uno dei due giorni, martedì o giovedì — l'altro resta riposo puro. Se le gambe sono ancora pesanti dalla corsa precedente, salta squat e ponte glutei e fai solo plank e stretching.
+    </div>
+  </section>
+
+  <footer>Domenica è sacra. Non si tocca.</footer>
+</div>
+
+<script>
+const DAYS = [
+  {
+    name: "Lunedì", tag: "Facile", tagClass: "facile",
+    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
+    note: "2' cammino / 3' corsa ripetuti × 7 giri.",
+    total: "~45 minuti"
+  },
+  {
+    name: "Martedì", tag: "Esercizi o riposo", tagClass: "esercizi",
+    segments: [],
+    note: "Corpo libero leggero (vedi sezione sotto) oppure riposo totale — scegli tu tra martedì e giovedì.",
+    total: ""
+  },
+  {
+    name: "Mercoledì", tag: "Piramide", tagClass: "piramide",
+    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
+    note: "Sali da 3' a 5' di corsa e ridiscendi, cammino sempre a 2'.",
+    total: "~48 minuti"
+  },
+  {
+    name: "Giovedì", tag: "Riposo", tagClass: "riposo",
+    segments: [],
+    note: "Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.",
+    total: ""
+  },
+  {
+    name: "Venerdì", tag: "Resistenza", tagClass: "resistenza",
+    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","5' defaticamento"]],
+    note: "2' cammino / 5' corsa ripetuti × 5 giri.",
+    total: "~45 minuti"
+  },
+  {
+    name: "Sabato", tag: "Piramide lunga", tagClass: "resistenza",
+    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
+    note: "La sessione più lunga della settimana, stessa piramide di mercoledì ma con due giri al top.",
+    total: "~53 minuti"
+  },
+  {
+    name: "Domenica", tag: "Sacra", tagClass: "sacro",
+    segments: [],
+    note: "Riposo totale. Non si discute.",
+    total: ""
+  }
+];
+
+function renderDays(){
+  const list = document.getElementById('dayList');
+  const todayIdx = (new Date().getDay() + 6) % 7; // lunedì = 0
+
+  DAYS.forEach((day, i) => {
+    const el = document.createElement('div');
+    el.className = 'day';
+    if(i === todayIdx) el.classList.add('open');
+
+    const segHtml = day.segments.length
+      ? `<div class="seq">${day.segments.map(([type,label]) =>
+          `<span class="seg ${type}"><span class="dot"></span>${label}</span>`).join('')}</div>`
+      : '';
+
+    el.innerHTML = `
+      <button class="day-head" type="button">
+        <span class="name">${day.name}</span>
+        <span class="meta">
+          <span class="tag ${day.tagClass}">${day.tag}</span>
+          <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <div class="day-body">
+        <div class="day-body-inner">
+          ${segHtml}
+          <p class="note">${day.note}</p>
+          ${day.total ? `<p class="total">Durata totale: ${day.total}</p>` : ''}
+        </div>
+      </div>
+    `;
+    el.querySelector('.day-head').addEventListener('click', () => {
+      el.classList.toggle('open');
+    });
+    list.appendChild(el);
+  });
+
+  document.getElementById('todayName').textContent = DAYS[todayIdx].name + ' — ' + DAYS[todayIdx].tag;
+}
+
+function initChecklist(){
+  const key = 'rwr-checklist';
+  const weekKey = 'rwr-checklist-week';
+  const today = new Date();
+  const currentWeek = today.getFullYear() + '-' + Math.ceil((((today - new Date(today.getFullYear(),0,1)) / 86400000) + new Date(today.getFullYear(),0,1).getDay() + 1) / 7);
+
+  let saved = {};
+  try{
+    if(localStorage.getItem(weekKey) === currentWeek){
+      saved = JSON.parse(localStorage.getItem(key) || '{}');
+    } else {
+      localStorage.setItem(weekKey, currentWeek);
+      localStorage.setItem(key, '{}');
+    }
+  }catch(e){}
+
+  document.querySelectorAll('#exList li').forEach(li => {
+    const cb = li.querySelector('input');
+    const exKey = li.dataset.ex;
+    if(saved[exKey]){ cb.checked = true; li.classList.add('done'); }
+    cb.addEventListener('change', () => {
+      li.classList.toggle('done', cb.checked);
+      try{
+        const current = JSON.parse(localStorage.getItem(key) || '{}');
+        current[exKey] = cb.checked;
+        localStorage.setItem(key, JSON.stringify(current));
+      }catch(e){}
+    });
+  });
+}
+
+renderDays();
+initChecklist();
+</script>
+
+</body>
+</html>
