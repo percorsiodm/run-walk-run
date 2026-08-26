@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corpo libero — Run Walk Run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#EEEAE0;
+    --sand-2:#E3DDCC;
+    --pine:#1F3A2E;
+    --amber:#C97F2B;
+    --amber-2:#A8681F;
+    --sage:#7C8B6F;
+    --sage-2:#5F6D53;
+    --ink:#1B1B18;
+    --ink-soft:#4A4A44;
+    --white:#FFFDF8;
+    --line:rgba(27,27,24,0.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(180deg, rgba(238,234,224,0.93) 0%, rgba(238,234,224,0.93) 100%),
+      url('RunWalk_1.jpg') center/cover fixed no-repeat;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Archivo Expanded', sans-serif;}
+  a{color:inherit;}
+  .wrap{max-width:640px; margin:0 auto; padding:32px 20px 80px;}
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:13px; font-weight:600; color:var(--ink-soft);
+    text-decoration:none; margin-bottom:20px;
+  }
+
+  .eyebrow{
+    font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--sage-2); font-weight:600; margin:0 0 6px;
+  }
+  h1{
+    font-family:'Archivo Expanded', sans-serif;
+    font-weight:800;
+    font-size:clamp(24px,6vw,32px);
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  .section-sub{color:var(--ink-soft); font-size:14px; margin:0 0 24px;}
+
+  .status-banner{
+    border-radius:var(--radius); padding:14px 18px; margin-bottom:20px;
+    font-size:14px; font-weight:600;
+    background:var(--white); border:1px solid var(--line); color:var(--ink-soft);
+  }
+  .status-banner.done{background:#E4EEDD; color:var(--sage-2); border-color:transparent;}
+
+  .exlist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .exlist li{
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px;
+  }
+  .exlist input[type=checkbox]{
+    width:22px; height:22px; margin-top:1px; flex-shrink:0; accent-color:var(--amber);
+  }
+  .exlist .ex-row{display:flex; align-items:flex-start; justify-content:space-between; width:100%; gap:10px;}
+  .exlist .ex-name{font-weight:600; font-size:15px;}
+  .exlist .ex-detail{color:var(--ink-soft); display:block; font-size:13px; margin-top:2px;}
+  .exlist .ex-video{
+    flex-shrink:0; font-size:12px; font-weight:600; color:var(--amber-2);
+    text-decoration:none; white-space:nowrap; padding:4px 0;
+  }
+  .exlist li.done .ex-name, .exlist li.done .ex-detail{
+    text-decoration:line-through; opacity:0.5;
+  }
+
+  .swap-note{
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; font-size:14px; color:var(--ink-soft); margin-top:20px;
+  }
+  .swap-note strong{color:var(--ink); font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="index.html">← Torna alla settimana</a>
+
+  <p class="eyebrow" id="weekLabel">Settimana</p>
+  <h1 class="display">Corpo libero</h1>
+  <p class="section-sub">15-20 minuti, poche serie, mai a cedimento. Spunta tutti gli esercizi per segnare la giornata come completata.</p>
+
+  <div class="status-banner" id="statusBanner"></div>
+
+  <ul class="exlist" id="exList"></ul>
+
+  <div class="swap-note">
+    <strong>Regola di scambio.</strong> Fai gli esercizi solo in uno dei due giorni, martedì o giovedì — l'altro resta riposo puro. Se le gambe sono ancora pesanti dalla corsa precedente, salta squat e ponte glutei e fai solo plank e il riscaldamento veloce.
+  </div>
+</div>
+
+<script>
+const WEEK_META = [
+  { label: "Base" },
+  { label: "Costruzione" },
+  { label: "Picco" },
+  { label: "Scarico" }
+];
+
+const EXERCISES = [
+  { key:"riscaldamento", name:"Riscaldamento veloce", video:"https://www.youtube.com/shorts/kN2j_xPJ34U",
+    detail:["3-4' prima di iniziare","3-4' prima di iniziare","3-4' prima di iniziare","4-5', con calma"] },
+  { key:"plank", name:"Plank", video:"https://www.youtube.com/shorts/JM7HRRU8-jk",
+    detail:["20-30 secondi × 3, schiena piatta","30-40 secondi × 3","40-50 secondi × 3","20 secondi × 2, solo mantenimento"] },
+  { key:"flessioni", name:"Flessioni normali", video:"https://www.youtube.com/shorts/ShPdy4oslNc",
+    detail:["6-8 rip. × 3","8-10 rip. × 3","10-12 rip. × 4","5-6 rip. × 2"] },
+  { key:"flessioni-ginocchia", name:"Flessioni sulle ginocchia", video:"https://www.youtube.com/shorts/W0GFFzyYUWI",
+    detail:["8-10 rip. × 3, se le normali sono ancora dure","10-12 rip. × 3","12-15 rip. × 3","6-8 rip. × 2"] },
+  { key:"squat", name:"Squat a corpo libero", video:"https://www.youtube.com/shorts/8VPkT0YTLHI",
+    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
+  { key:"ponte", name:"Ponte glutei", video:"https://www.youtube.com/shorts/ekp_416qE0I",
+    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
+  { key:"sideplank", name:"Side plank", video:"https://www.youtube.com/shorts/sJwYvq2UiQ4",
+    detail:["15-20 secondi per lato × 2","20-25 secondi per lato × 2","25-30 secondi per lato × 3","15 secondi per lato × 2"] }
+];
+
+const params = new URLSearchParams(window.location.search);
+let weekIdx = parseInt(params.get('week'), 10);
+if(isNaN(weekIdx) || weekIdx < 0 || weekIdx > 3) weekIdx = 0;
+
+const dayKey = `w${weekIdx}-Martedì`;
+const checklistKey = `rwr-exercises-w${weekIdx}`;
+
+document.getElementById('weekLabel').textContent = `Settimana ${weekIdx + 1} — ${WEEK_META[weekIdx].label}`;
+
+function getChecklist(){
+  try{
+    return JSON.parse(localStorage.getItem(checklistKey) || '{}');
+  }catch(e){
+    return {};
+  }
+}
+
+function saveChecklist(state){
+  try{
+    localStorage.setItem(checklistKey, JSON.stringify(state));
+  }catch(e){}
+}
+
+function getCompletions(){
+  try{
+    return JSON.parse(localStorage.getItem('rwr-completions') || '{}');
+  }catch(e){
+    return {};
+  }
+}
+
+function formatDate(isoDate){
+  const [yyyy, mm, dd] = isoDate.split('-');
+  return `${dd}-${mm}-${yyyy.slice(2)}`;
+}
+
+function setCompletion(done){
+  const completions = getCompletions();
+  if(done){
+    if(!completions[dayKey]){
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      completions[dayKey] = `${yyyy}-${mm}-${dd}`;
+    }
+  } else {
+    delete completions[dayKey];
+  }
+  try{
+    localStorage.setItem('rwr-completions', JSON.stringify(completions));
+  }catch(e){}
+}
+
+function renderStatus(){
+  const banner = document.getElementById('statusBanner');
+  const completions = getCompletions();
+  const date = completions[dayKey];
+  if(date){
+    banner.className = 'status-banner done';
+    banner.textContent = `Completato il ${formatDate(date)}`;
+  } else {
+    banner.className = 'status-banner';
+    banner.textContent = 'Spunta tutti gli esercizi qui sotto per segnare la giornata come completata.';
+  }
+}
+
+function checkAllDone(state){
+  return EXERCISES.every(ex => state[ex.key]);
+}
+
+function renderExercises(){
+  const list = document.getElementById('exList');
+  list.innerHTML = '';
+  const state = getChecklist();
+
+  EXERCISES.forEach(ex => {
+    const li = document.createElement('li');
+    if(state[ex.key]) li.classList.add('done');
+    li.innerHTML = `
+      <input type="checkbox" ${state[ex.key] ? 'checked' : ''}>
+      <div class="ex-row">
+        <div>
+          <span class="ex-name">${ex.name}</span>
+          <span class="ex-detail">${ex.detail[weekIdx]}</span>
+        </div>
+        <a class="ex-video" href="${ex.video}" target="_blank" rel="noopener">Video ↗</a>
+      </div>
+    `;
+    const cb = li.querySelector('input');
+    cb.addEventListener('change', () => {
+      const current = getChecklist();
+      current[ex.key] = cb.checked;
+      saveChecklist(current);
+      li.classList.toggle('done', cb.checked);
+      setCompletion(checkAllDone(current));
+      renderStatus();
+    });
+    list.appendChild(li);
+  });
+}
+
+renderExercises();
+renderStatus();
+</script>
+
+</body>
+</html>

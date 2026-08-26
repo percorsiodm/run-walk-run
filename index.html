@@ -63,15 +63,6 @@
   }
   .hero p{margin:0; color:var(--sand-2); font-size:15px; max-width:46ch;}
 
-  .hero-today{
-    display:flex; align-items:center; gap:16px;
-    margin-top:26px; background:rgba(255,253,248,0.06);
-    border:1px solid rgba(255,253,248,0.14);
-    border-radius:var(--radius); padding:14px 16px;
-  }
-  .hero-today .label{font-size:12px; color:var(--sage); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;}
-  .hero-today .value{font-family:'Archivo Expanded'; font-weight:800; font-size:20px; margin-top:2px;}
-
   .motivate{
     display:flex; align-items:center; gap:14px;
     margin-top:26px; background:rgba(255,253,248,0.06);
@@ -98,7 +89,12 @@
   .complete-btn:hover{background:var(--sand);}
   .complete-btn.done{background:#E4EEDD; color:var(--sage-2);}
 
-  svg.dial{flex-shrink:0;}
+  .complete-badge{
+    flex-shrink:0; font-size:11px; font-weight:600; letter-spacing:0.02em;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+    background:var(--sand-2); color:var(--ink-soft);
+  }
+  .complete-badge.done{background:#E4EEDD; color:var(--sage-2);}
 
   section{margin-top:40px;}
   h2{
@@ -172,32 +168,6 @@
   .note{font-size:13px; color:var(--ink-soft); margin:10px 0 0;}
   .total{font-size:13px; color:var(--ink-soft); margin:2px 0 0; font-weight:500;}
 
-  .exlist{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:6px;}
-  .exlist li{
-    display:flex; align-items:flex-start; gap:10px;
-    font-size:14px; padding:8px 0; border-bottom:1px solid var(--line);
-  }
-  .exlist li:last-child{border-bottom:none;}
-  .exlist input[type=checkbox]{
-    width:19px; height:19px; margin-top:1px; flex-shrink:0; accent-color:var(--amber);
-  }
-  .exlist .ex-row{display:flex; align-items:flex-start; justify-content:space-between; width:100%; gap:10px;}
-  .exlist .ex-name{font-weight:600;}
-  .exlist .ex-detail{color:var(--ink-soft); display:block; font-size:13px;}
-  .exlist .ex-video{
-    flex-shrink:0; font-size:12px; font-weight:600; color:var(--amber-2);
-    text-decoration:none; white-space:nowrap; padding:4px 0;
-  }
-  .exlist li.done .ex-name, .exlist li.done .ex-detail{
-    text-decoration:line-through; opacity:0.5;
-  }
-
-  .swap-note{
-    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 18px; font-size:14px; color:var(--ink-soft); margin-top:14px;
-  }
-  .swap-note strong{color:var(--ink); font-weight:600;}
-
   .legend{display:flex; gap:18px; margin:14px 0 0; font-size:12px; color:var(--ink-soft);}
   .legend span{display:inline-flex; align-items:center; gap:6px;}
   .legend .dot{width:8px; height:8px; border-radius:50%;}
@@ -229,7 +199,7 @@
 
   <section id="settimana">
     <h2>Il ciclo di 4 settimane</h2>
-    <p class="section-sub">Tocca una settimana per vedere il suo piano, poi un giorno per la sequenza esatta di cammino e corsa.</p>
+    <p class="section-sub">Tocca una settimana per vedere il suo piano, poi un giorno per la sequenza esatta di cammino e corsa. Il martedì apre gli esercizi di corpo libero.</p>
 
     <div class="weektabs" id="weekTabs"></div>
     <p class="week-note" id="weekNote"></p>
@@ -241,27 +211,9 @@
     </div>
   </section>
 
-  <section id="esercizi">
-    <h2>Corpo libero — martedì o giovedì</h2>
-    <p class="section-sub">15-20 minuti, poche serie, mai a cedimento. Ogni esercizio ha un video di riferimento. Le spunte si resettano ogni lunedì.</p>
-
-    <div class="day open">
-      <div class="day-body" style="max-height:900px;">
-        <div class="day-body-inner">
-          <ul class="exlist" id="exList"></ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="swap-note">
-      <strong>Regola di scambio.</strong> Fai gli esercizi solo in uno dei due giorni, martedì o giovedì — l'altro resta riposo puro. Se le gambe sono ancora pesanti dalla corsa precedente, salta squat e ponte glutei e fai solo plank e il riscaldamento veloce.
-    </div>
-  </section>
-
   <footer>Domenica è sacra. Non si tocca.</footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const WEEK_META = [
   { label: "Base", note: "Settimana 1 — si riparte piano, per ritrovare il ritmo." },
@@ -277,7 +229,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"2' cammino / 3' corsa ripetuti × 7 giri.", total:"~45 minuti" },
     { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
-      note:"Corpo libero leggero (vedi sezione sotto) oppure riposo totale — scegli tu tra martedì e giovedì.", total:"" },
+      note:"Corpo libero leggero (tocca per aprire la scheda con i video) oppure riposo totale — scegli tu tra martedì e giovedì.", total:"" },
     { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Sali da 3' a 5' di corsa e ridiscendi, cammino sempre a 2'.", total:"~48 minuti" },
@@ -297,7 +249,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"2' cammino / 4' corsa ripetuti × 6 giri — un gradino sopra la settimana 1.", total:"~46 minuti" },
     { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
-      note:"Corpo libero, livello costruzione (vedi sezione sotto) oppure riposo totale.", total:"" },
+      note:"Corpo libero, livello costruzione (tocca per aprire la scheda con i video) oppure riposo totale.", total:"" },
     { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"La piramide sale fino a 6' di corsa questa settimana.", total:"~54 minuti" },
@@ -317,7 +269,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"2' cammino / 4' corsa ripetuti × 7 giri, la settimana più densa del ciclo.", total:"~52 minuti" },
     { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
-      note:"Corpo libero, livello picco (vedi sezione sotto) oppure riposo totale.", total:"" },
+      note:"Corpo libero, livello picco (tocca per aprire la scheda con i video) oppure riposo totale.", total:"" },
     { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"Piramide più corta ma più intensa, parte già da 4' di corsa.", total:"~52 minuti" },
@@ -337,7 +289,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"2' cammino / 3' corsa × 6 giri, ritmo comodo. Settimana di recupero.", total:"~40 minuti" },
     { name:"Martedì", tag:"Esercizi leggeri o riposo", tagClass:"esercizi", segments:[],
-      note:"Corpo libero, livello scarico (poche serie, vedi sezione sotto) oppure riposo totale.", total:"" },
+      note:"Corpo libero, livello scarico (tocca per aprire la scheda con i video) oppure riposo totale.", total:"" },
     { name:"Mercoledì", tag:"Facile", tagClass:"facile",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Niente piramide questa settimana, solo intervalli semplici e regolari.", total:"~35 minuti" },
@@ -351,23 +303,6 @@ const WEEKS = [
       note:"Un po' più lungo ma sempre a ritmo facile, per chiudere il ciclo riposati.", total:"~45 minuti" },
     { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
   ]
-];
-
-const EXERCISES = [
-  { key:"riscaldamento", name:"Riscaldamento veloce", video:"https://www.youtube.com/shorts/kN2j_xPJ34U",
-    detail:["3-4' prima di iniziare","3-4' prima di iniziare","3-4' prima di iniziare","4-5', con calma"] },
-  { key:"plank", name:"Plank", video:"https://www.youtube.com/shorts/JM7HRRU8-jk",
-    detail:["20-30 secondi × 3, schiena piatta","30-40 secondi × 3","40-50 secondi × 3","20 secondi × 2, solo mantenimento"] },
-  { key:"flessioni", name:"Flessioni normali", video:"https://www.youtube.com/shorts/ShPdy4oslNc",
-    detail:["6-8 rip. × 3","8-10 rip. × 3","10-12 rip. × 4","5-6 rip. × 2"] },
-  { key:"flessioni-ginocchia", name:"Flessioni sulle ginocchia", video:"https://www.youtube.com/shorts/W0GFFzyYUWI",
-    detail:["8-10 rip. × 3, se le normali sono ancora dure","10-12 rip. × 3","12-15 rip. × 3","6-8 rip. × 2"] },
-  { key:"squat", name:"Squat a corpo libero", video:"https://www.youtube.com/shorts/8VPkT0YTLHI",
-    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
-  { key:"ponte", name:"Ponte glutei", video:"https://www.youtube.com/shorts/ekp_416qE0I",
-    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
-  { key:"sideplank", name:"Side plank", video:"https://www.youtube.com/shorts/sJwYvq2UiQ4",
-    detail:["15-20 secondi per lato × 2","20-25 secondi per lato × 2","25-30 secondi per lato × 3","15 secondi per lato × 2"] }
 ];
 
 let currentWeek = 0;
@@ -384,7 +319,6 @@ function renderWeekTabs(){
       currentWeek = i;
       renderWeekTabs();
       renderDays();
-      renderExercises();
     });
     wrap.appendChild(btn);
   });
@@ -400,6 +334,8 @@ function renderDays(){
     const el = document.createElement('div');
     el.className = 'day';
 
+    const isEsercizi = day.tagClass === 'esercizi';
+
     const segHtml = day.segments.length
       ? `<div class="seq">${day.segments.map(([type,label]) =>
           `<span class="seg ${type}"><span class="dot"></span>${label}</span>`).join('')}</div>`
@@ -410,9 +346,17 @@ function renderDays(){
 
     const dayKey = `w${currentWeek}-${day.name}`;
     const completedDate = getCompletion(dayKey);
-    const completeHtml = completedDate
-      ? `<button class="complete-btn done" type="button">Completato il ${formatDate(completedDate)}</button>`
-      : `<button class="complete-btn" type="button">Completare</button>`;
+
+    let completeHtml;
+    if(isEsercizi){
+      completeHtml = completedDate
+        ? `<span class="complete-badge done">Completato il ${formatDate(completedDate)}</span>`
+        : '';
+    } else {
+      completeHtml = completedDate
+        ? `<button class="complete-btn done" type="button">Completato il ${formatDate(completedDate)}</button>`
+        : `<button class="complete-btn" type="button">Completare</button>`;
+    }
 
     el.innerHTML = `
       <button class="day-head" type="button">
@@ -432,11 +376,13 @@ function renderDays(){
         </div>
       </div>
     `;
-    el.querySelector('.complete-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleCompletion(dayKey);
-      renderDays();
-    });
+    if(!isEsercizi){
+      el.querySelector('.complete-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCompletion(dayKey);
+        renderDays();
+      });
+    }
     if(showPdf){
       el.querySelector('.pdf-btn').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -444,67 +390,13 @@ function renderDays(){
       });
     }
     el.querySelector('.day-head').addEventListener('click', () => {
-      if(day.tagClass === 'esercizi'){
-        const target = document.getElementById('esercizi');
-        target.querySelector('.day').classList.add('open');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if(isEsercizi){
+        window.location.href = `esercizi.html?week=${currentWeek}`;
       } else {
         el.classList.toggle('open');
       }
     });
     list.appendChild(el);
-  });
-}
-
-function renderExercises(){
-  const list = document.getElementById('exList');
-  list.innerHTML = '';
-  EXERCISES.forEach(ex => {
-    const li = document.createElement('li');
-    li.dataset.ex = ex.key;
-    li.innerHTML = `
-      <input type="checkbox">
-      <div class="ex-row">
-        <div>
-          <span class="ex-name">${ex.name}</span>
-          <span class="ex-detail">${ex.detail[currentWeek]}</span>
-        </div>
-        <a class="ex-video" href="${ex.video}" target="_blank" rel="noopener">Video ↗</a>
-      </div>
-    `;
-    list.appendChild(li);
-  });
-  initChecklist();
-}
-
-function initChecklist(){
-  const key = 'rwr-checklist';
-  const weekKey = 'rwr-checklist-week';
-  const today = new Date();
-  const currentCalWeek = today.getFullYear() + '-' + Math.ceil((((today - new Date(today.getFullYear(),0,1)) / 86400000) + new Date(today.getFullYear(),0,1).getDay() + 1) / 7);
-
-  let saved = {};
-  try{
-    if(localStorage.getItem(weekKey) === currentCalWeek){
-      saved = JSON.parse(localStorage.getItem(key) || '{}');
-    } else {
-      localStorage.setItem(weekKey, currentCalWeek);
-      localStorage.setItem(key, '{}');
-    }
-  }catch(e){}
-
-  document.querySelectorAll('#exList li').forEach(li => {
-    const cb = li.querySelector('input');
-    const exKey = li.dataset.ex;
-    if(saved[exKey]){ cb.checked = true; li.classList.add('done'); }
-    cb.addEventListener('change', () => {
-      li.classList.toggle('done', cb.checked);
-      try{
-        const current = JSON.parse(localStorage.getItem(key) || '{}');
-        current[exKey] = cb.checked;
-        localStorage.setItem(key, JSON.stringify(current));
-      }catch(e){}
-    });
   });
 }
 
@@ -608,9 +500,10 @@ function renderMotivation(){
 
 renderWeekTabs();
 renderDays();
-renderExercises();
 renderMotivation();
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
