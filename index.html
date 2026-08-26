@@ -81,6 +81,20 @@
   }
   .section-sub{color:var(--ink-soft); font-size:14px; margin:0 0 18px;}
 
+  .weektabs{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+    margin:0 0 8px;
+  }
+  .weektab{
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    padding:10px 6px; text-align:center; cursor:pointer; font-family:inherit;
+  }
+  .weektab .num{font-family:'Archivo Expanded'; font-weight:800; font-size:16px; display:block;}
+  .weektab .lbl{font-size:11px; color:var(--ink-soft); display:block; margin-top:2px;}
+  .weektab.active{background:var(--pine); border-color:var(--pine);}
+  .weektab.active .num, .weektab.active .lbl{color:var(--sand);}
+  .week-note{font-size:13px; color:var(--ink-soft); margin:10px 0 20px;}
+
   .day{
     background:var(--white);
     border:1px solid var(--line);
@@ -141,8 +155,13 @@
   .exlist input[type=checkbox]{
     width:19px; height:19px; margin-top:1px; flex-shrink:0; accent-color:var(--amber);
   }
+  .exlist .ex-row{display:flex; align-items:flex-start; justify-content:space-between; width:100%; gap:10px;}
   .exlist .ex-name{font-weight:600;}
   .exlist .ex-detail{color:var(--ink-soft); display:block; font-size:13px;}
+  .exlist .ex-video{
+    flex-shrink:0; font-size:12px; font-weight:600; color:var(--amber-2);
+    text-decoration:none; white-space:nowrap; padding:4px 0;
+  }
   .exlist li.done .ex-name, .exlist li.done .ex-detail{
     text-decoration:line-through; opacity:0.5;
   }
@@ -171,7 +190,7 @@
   <div class="inner">
     <p class="eyebrow">Piano personale</p>
     <h1 class="display">Run walk run — la settimana</h1>
-    <p>Cammino e corsa alternati ogni mattina, due sessioni leggere di corpo libero, un giorno intoccabile di riposo.</p>
+    <p>Cammino e corsa alternati ogni mattina, due sessioni leggere di corpo libero, un giorno intoccabile di riposo. Ciclo di 4 settimane che si ripete.</p>
 
     <div class="hero-today" id="heroToday">
       <svg class="dial" width="56" height="56" viewBox="0 0 56 56" role="img" aria-hidden="true">
@@ -190,8 +209,12 @@
 <div class="wrap">
 
   <section id="settimana">
-    <h2>I sette giorni</h2>
-    <p class="section-sub">Tocca un giorno per vedere la sequenza esatta di cammino e corsa.</p>
+    <h2>Il ciclo di 4 settimane</h2>
+    <p class="section-sub">Tocca una settimana per vedere il suo piano, poi un giorno per la sequenza esatta di cammino e corsa.</p>
+
+    <div class="weektabs" id="weekTabs"></div>
+    <p class="week-note" id="weekNote"></p>
+
     <div id="dayList"></div>
     <div class="legend">
       <span><i class="dot walk"></i>cammino</span>
@@ -201,20 +224,13 @@
 
   <section id="esercizi">
     <h2>Corpo libero — martedì o giovedì</h2>
-    <p class="section-sub">15-20 minuti, poche serie, mai a cedimento. Le spunte si resettano ogni lunedì.</p>
+    <p class="section-sub">15-20 minuti, poche serie, mai a cedimento. Ogni esercizio ha un video di riferimento. Le spunte si resettano ogni lunedì.</p>
 
     <div class="day open">
-      <div class="day-body" style="max-height:800px;">
+      <div class="day-body" style="max-height:900px;">
         <div class="day-body-inner">
           <p class="note" style="margin-top:0;">Riscaldamento: 3-4' di mobilità articolare (spalle, anche, caviglie).</p>
-          <ul class="exlist" id="exList">
-            <li data-ex="plank"><input type="checkbox"><div><span class="ex-name">Plank</span><span class="ex-detail">20-30 secondi × 3, schiena piatta</span></div></li>
-            <li data-ex="flessioni"><input type="checkbox"><div><span class="ex-name">Flessioni</span><span class="ex-detail">sulle ginocchia o inclinate, 8-10 rip. × 3</span></div></li>
-            <li data-ex="squat"><input type="checkbox"><div><span class="ex-name">Squat a corpo libero</span><span class="ex-detail">12-15 rip. × 3</span></div></li>
-            <li data-ex="ponte"><input type="checkbox"><div><span class="ex-name">Ponte glutei</span><span class="ex-detail">12-15 rip. × 3</span></div></li>
-            <li data-ex="sideplank"><input type="checkbox"><div><span class="ex-name">Side plank</span><span class="ex-detail">15-20 secondi per lato × 2</span></div></li>
-            <li data-ex="stretch"><input type="checkbox"><div><span class="ex-name">Stretching finale</span><span class="ex-detail">5' su quadricipiti, polpacci, lombari</span></div></li>
-          </ul>
+          <ul class="exlist" id="exList"></ul>
         </div>
       </div>
     </div>
@@ -228,56 +244,139 @@
 </div>
 
 <script>
-const DAYS = [
-  {
-    name: "Lunedì", tag: "Facile", tagClass: "facile",
-    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
-    note: "2' cammino / 3' corsa ripetuti × 7 giri.",
-    total: "~45 minuti"
-  },
-  {
-    name: "Martedì", tag: "Esercizi o riposo", tagClass: "esercizi",
-    segments: [],
-    note: "Corpo libero leggero (vedi sezione sotto) oppure riposo totale — scegli tu tra martedì e giovedì.",
-    total: ""
-  },
-  {
-    name: "Mercoledì", tag: "Piramide", tagClass: "piramide",
-    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
-    note: "Sali da 3' a 5' di corsa e ridiscendi, cammino sempre a 2'.",
-    total: "~48 minuti"
-  },
-  {
-    name: "Giovedì", tag: "Riposo", tagClass: "riposo",
-    segments: [],
-    note: "Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.",
-    total: ""
-  },
-  {
-    name: "Venerdì", tag: "Resistenza", tagClass: "resistenza",
-    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","5' defaticamento"]],
-    note: "2' cammino / 5' corsa ripetuti × 5 giri.",
-    total: "~45 minuti"
-  },
-  {
-    name: "Sabato", tag: "Piramide lunga", tagClass: "resistenza",
-    segments: [["walk","5' riscaldamento"], ["walk","2'"], ["run","3'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","5'"], ["walk","2'"], ["run","4'"], ["walk","2'"], ["run","3'"], ["walk","5' defaticamento"]],
-    note: "La sessione più lunga della settimana, stessa piramide di mercoledì ma con due giri al top.",
-    total: "~53 minuti"
-  },
-  {
-    name: "Domenica", tag: "Sacra", tagClass: "sacro",
-    segments: [],
-    note: "Riposo totale. Non si discute.",
-    total: ""
-  }
+const WEEK_META = [
+  { label: "Base", note: "Settimana 1 — si riparte piano, per ritrovare il ritmo." },
+  { label: "Costruzione", note: "Settimana 2 — sale il volume di corsa, cammino sempre a 2'." },
+  { label: "Picco", note: "Settimana 3 — la settimana più impegnativa del ciclo." },
+  { label: "Scarico", note: "Settimana 4 — si torna leggeri, il corpo assorbe il lavoro fatto. Poi si riparte dalla settimana 1." }
 ];
+
+const WEEKS = [
+  // Settimana 1 — Base
+  [
+    { name:"Lunedì", tag:"Facile", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 3' corsa ripetuti × 7 giri.", total:"~45 minuti" },
+    { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
+      note:"Corpo libero leggero (vedi sezione sotto) oppure riposo totale — scegli tu tra martedì e giovedì.", total:"" },
+    { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"Sali da 3' a 5' di corsa e ridiscendi, cammino sempre a 2'.", total:"~48 minuti" },
+    { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
+      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+    { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 5' corsa ripetuti × 5 giri.", total:"~45 minuti" },
+    { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"Il giorno più lungo della settimana, stessa piramide di mercoledì ma con due giri al top.", total:"~53 minuti" },
+    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+  ],
+  // Settimana 2 — Costruzione
+  [
+    { name:"Lunedì", tag:"Facile+", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 4' corsa ripetuti × 6 giri — un gradino sopra la settimana 1.", total:"~46 minuti" },
+    { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
+      note:"Corpo libero, livello costruzione (vedi sezione sotto) oppure riposo totale.", total:"" },
+    { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"La piramide sale fino a 6' di corsa questa settimana.", total:"~54 minuti" },
+    { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
+      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+    { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 6' corsa ripetuti × 5 giri.", total:"~50 minuti" },
+    { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"Il giorno lungo della settimana, due giri al top di 6'.", total:"~62 minuti" },
+    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+  ],
+  // Settimana 3 — Picco
+  [
+    { name:"Lunedì", tag:"Facile+", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 4' corsa ripetuti × 7 giri, la settimana più densa del ciclo.", total:"~52 minuti" },
+    { name:"Martedì", tag:"Esercizi o riposo", tagClass:"esercizi", segments:[],
+      note:"Corpo libero, livello picco (vedi sezione sotto) oppure riposo totale.", total:"" },
+    { name:"Mercoledì", tag:"Piramide", tagClass:"piramide",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
+      note:"Piramide più corta ma più intensa, parte già da 4' di corsa.", total:"~52 minuti" },
+    { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
+      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+    { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 6' corsa ripetuti × 5 giri.", total:"~50 minuti" },
+    { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","7'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
+      note:"Il picco del ciclo: si arriva a 7' di corsa continua.", total:"~63 minuti" },
+    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+  ],
+  // Settimana 4 — Scarico
+  [
+    { name:"Lunedì", tag:"Scarico", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 3' corsa × 6 giri, ritmo comodo. Settimana di recupero.", total:"~40 minuti" },
+    { name:"Martedì", tag:"Esercizi leggeri o riposo", tagClass:"esercizi", segments:[],
+      note:"Corpo libero, livello scarico (poche serie, vedi sezione sotto) oppure riposo totale.", total:"" },
+    { name:"Mercoledì", tag:"Facile", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"Niente piramide questa settimana, solo intervalli semplici e regolari.", total:"~35 minuti" },
+    { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
+      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+    { name:"Venerdì", tag:"Facile", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
+      note:"2' cammino / 4' corsa × 5 giri, senza spingere.", total:"~40 minuti" },
+    { name:"Sabato", tag:"Facile lungo", tagClass:"facile",
+      segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
+      note:"Un po' più lungo ma sempre a ritmo facile, per chiudere il ciclo riposati.", total:"~45 minuti" },
+    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+  ]
+];
+
+const EXERCISES = [
+  { key:"plank", name:"Plank", video:"https://www.youtube.com/watch?v=uefcn2Enyas",
+    detail:["20-30 secondi × 3, schiena piatta","30-40 secondi × 3","40-50 secondi × 3","20 secondi × 2, solo mantenimento"] },
+  { key:"flessioni", name:"Flessioni", video:"https://www.youtube.com/watch?v=b0Xhc1aN5jQ",
+    detail:["sulle ginocchia o inclinate, 8-10 rip. × 3","10-12 rip. × 3","12-15 rip. × 3","6-8 rip. × 2"] },
+  { key:"squat", name:"Squat a corpo libero", video:"https://www.youtube.com/watch?v=O3q4X0apJuo",
+    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
+  { key:"ponte", name:"Ponte glutei", video:"https://www.youtube.com/watch?v=EJBpPCQQPhs",
+    detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
+  { key:"sideplank", name:"Side plank", video:"https://www.youtube.com/watch?v=LqZwLDnPvsA",
+    detail:["15-20 secondi per lato × 2","20-25 secondi per lato × 2","25-30 secondi per lato × 3","15 secondi per lato × 2"] },
+  { key:"stretch", name:"Stretching finale", video:"https://www.youtube.com/watch?v=D5HlM0P8CgM",
+    detail:["5' su quadricipiti, polpacci, lombari","5' su quadricipiti, polpacci, lombari","6' su quadricipiti, polpacci, lombari","8', più mobilità che allungamento, senza fretta"] }
+];
+
+let currentWeek = 0;
+
+function renderWeekTabs(){
+  const wrap = document.getElementById('weekTabs');
+  wrap.innerHTML = '';
+  WEEK_META.forEach((meta, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'weektab' + (i === currentWeek ? ' active' : '');
+    btn.type = 'button';
+    btn.innerHTML = `<span class="num">Sett. ${i+1}</span><span class="lbl">${meta.label}</span>`;
+    btn.addEventListener('click', () => {
+      currentWeek = i;
+      renderWeekTabs();
+      renderDays();
+      renderExercises();
+    });
+    wrap.appendChild(btn);
+  });
+  document.getElementById('weekNote').textContent = WEEK_META[currentWeek].note;
+}
 
 function renderDays(){
   const list = document.getElementById('dayList');
-  const todayIdx = (new Date().getDay() + 6) % 7; // lunedì = 0
+  list.innerHTML = '';
+  const days = WEEKS[currentWeek];
+  const todayIdx = (new Date().getDay() + 6) % 7;
 
-  DAYS.forEach((day, i) => {
+  days.forEach((day, i) => {
     const el = document.createElement('div');
     el.className = 'day';
     if(i === todayIdx) el.classList.add('open');
@@ -309,21 +408,42 @@ function renderDays(){
     list.appendChild(el);
   });
 
-  document.getElementById('todayName').textContent = DAYS[todayIdx].name + ' — ' + DAYS[todayIdx].tag;
+  document.getElementById('todayName').textContent = days[todayIdx].name + ' — ' + days[todayIdx].tag;
+}
+
+function renderExercises(){
+  const list = document.getElementById('exList');
+  list.innerHTML = '';
+  EXERCISES.forEach(ex => {
+    const li = document.createElement('li');
+    li.dataset.ex = ex.key;
+    li.innerHTML = `
+      <input type="checkbox">
+      <div class="ex-row">
+        <div>
+          <span class="ex-name">${ex.name}</span>
+          <span class="ex-detail">${ex.detail[currentWeek]}</span>
+        </div>
+        <a class="ex-video" href="${ex.video}" target="_blank" rel="noopener">Video ↗</a>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+  initChecklist();
 }
 
 function initChecklist(){
   const key = 'rwr-checklist';
   const weekKey = 'rwr-checklist-week';
   const today = new Date();
-  const currentWeek = today.getFullYear() + '-' + Math.ceil((((today - new Date(today.getFullYear(),0,1)) / 86400000) + new Date(today.getFullYear(),0,1).getDay() + 1) / 7);
+  const currentCalWeek = today.getFullYear() + '-' + Math.ceil((((today - new Date(today.getFullYear(),0,1)) / 86400000) + new Date(today.getFullYear(),0,1).getDay() + 1) / 7);
 
   let saved = {};
   try{
-    if(localStorage.getItem(weekKey) === currentWeek){
+    if(localStorage.getItem(weekKey) === currentCalWeek){
       saved = JSON.parse(localStorage.getItem(key) || '{}');
     } else {
-      localStorage.setItem(weekKey, currentWeek);
+      localStorage.setItem(weekKey, currentCalWeek);
       localStorage.setItem(key, '{}');
     }
   }catch(e){}
@@ -343,8 +463,18 @@ function initChecklist(){
   });
 }
 
+// Determina automaticamente la settimana del ciclo in base alla settimana dell'anno,
+// così il ciclo di 4 settimane si ripete da solo senza doverlo scegliere ogni volta.
+(function autoSelectWeek(){
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), 0, 1);
+  const isoWeek = Math.ceil((((today - firstDay) / 86400000) + firstDay.getDay() + 1) / 7);
+  currentWeek = (isoWeek - 1) % 4;
+})();
+
+renderWeekTabs();
 renderDays();
-initChecklist();
+renderExercises();
 </script>
 
 </body>
