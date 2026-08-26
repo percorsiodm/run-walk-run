@@ -38,13 +38,16 @@
   .wrap{max-width:720px; margin:0 auto; padding:0 20px 80px;}
 
   header.hero{
-    background:var(--pine);
+    position:relative;
+    background:
+      linear-gradient(180deg, rgba(22,40,31,0.72) 0%, rgba(22,40,31,0.88) 100%),
+      url('RunWalk_1.jpg') center 35%/cover no-repeat;
     color:var(--sand);
     padding:44px 20px 36px;
     border-bottom-left-radius:28px;
     border-bottom-right-radius:28px;
   }
-  header.hero .inner{max-width:720px; margin:0 auto;}
+  header.hero .inner{max-width:720px; margin:0 auto; position:relative; z-index:1;}
   .eyebrow{
     font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
     color:var(--sage); font-weight:600; margin:0 0 6px;
