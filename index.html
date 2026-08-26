@@ -72,6 +72,23 @@
   .hero-today .label{font-size:12px; color:var(--sage); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;}
   .hero-today .value{font-family:'Archivo Expanded'; font-weight:800; font-size:20px; margin-top:2px;}
 
+  .motivate{
+    display:flex; align-items:center; gap:14px;
+    margin-top:26px; background:rgba(255,253,248,0.06);
+    border:1px solid rgba(255,253,248,0.14);
+    border-radius:var(--radius); padding:16px 18px;
+  }
+  .motivate svg{flex-shrink:0; color:var(--amber);}
+  .motivate p{margin:0; color:var(--sand); font-size:14px; line-height:1.5;}
+
+  .pdf-btn{
+    flex-shrink:0; font-size:11px; font-weight:600; letter-spacing:0.02em;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+    background:var(--sand-2); color:var(--ink-soft); border:none; cursor:pointer;
+    font-family:inherit;
+  }
+  .pdf-btn:hover{background:var(--sand);}
+
   svg.dial{flex-shrink:0;}
 
   section{margin-top:40px;}
@@ -192,16 +209,9 @@
     <h1 class="display">Run walk run — la settimana</h1>
     <p>Cammino e corsa alternati ogni mattina, due sessioni leggere di corpo libero, un giorno intoccabile di riposo. Ciclo di 4 settimane che si ripete.</p>
 
-    <div class="hero-today" id="heroToday">
-      <svg class="dial" width="56" height="56" viewBox="0 0 56 56" role="img" aria-hidden="true">
-        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,253,248,0.15)" stroke-width="6"/>
-        <circle id="dialArc" cx="28" cy="28" r="24" fill="none" stroke="#C97F2B" stroke-width="6"
-          stroke-dasharray="150.8" stroke-dashoffset="40" stroke-linecap="round" transform="rotate(-90 28 28)"/>
-      </svg>
-      <div>
-        <p class="label">Oggi</p>
-        <p class="value" id="todayName">—</p>
-      </div>
+    <div class="motivate" id="motivateBox">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4.5 13.5H11L10 22L19.5 9.5H13L13 2Z" fill="currentColor"/></svg>
+      <p id="motivateText"></p>
     </div>
   </div>
 </header>
@@ -242,6 +252,7 @@
   <footer>Domenica è sacra. Non si tocca.</footer>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const WEEK_META = [
   { label: "Base", note: "Settimana 1 — si riparte piano, per ritrovare il ritmo." },
@@ -387,10 +398,14 @@ function renderDays(){
           `<span class="seg ${type}"><span class="dot"></span>${label}</span>`).join('')}</div>`
       : '';
 
+    const showPdf = day.name !== 'Martedì' && day.name !== 'Giovedì';
+    const pdfHtml = showPdf ? `<button class="pdf-btn" type="button">PDF ↓</button>` : '';
+
     el.innerHTML = `
       <button class="day-head" type="button">
         <span class="name">${day.name}</span>
         <span class="meta">
+          ${pdfHtml}
           <span class="tag ${day.tagClass}">${day.tag}</span>
           <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
@@ -403,6 +418,12 @@ function renderDays(){
         </div>
       </div>
     `;
+    if(showPdf){
+      el.querySelector('.pdf-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        generateDayPdf(day, currentWeek);
+      });
+    }
     el.querySelector('.day-head').addEventListener('click', () => {
       if(day.tagClass === 'esercizi'){
         const target = document.getElementById('esercizi');
@@ -414,8 +435,6 @@ function renderDays(){
     });
     list.appendChild(el);
   });
-
-  document.getElementById('todayName').textContent = days[todayIdx].name + ' — ' + days[todayIdx].tag;
 }
 
 function renderExercises(){
@@ -470,6 +489,89 @@ function initChecklist(){
   });
 }
 
+function generateDayPdf(day, weekIdx){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const marginX = 20;
+  let y = 25;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.text(`${day.name}`, marginX, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`Settimana ${weekIdx + 1} — ${WEEK_META[weekIdx].label} — ${day.tag}`, marginX, y);
+  y += 12;
+
+  doc.setDrawColor(220, 220, 220);
+  doc.line(marginX, y, 190, y);
+  y += 10;
+
+  doc.setTextColor(30, 30, 30);
+  if(day.segments.length){
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Sequenza', marginX, y);
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    const seqText = day.segments.map(([type,label]) => (type === 'walk' ? 'Cammino ' : 'Corsa ') + label).join('  •  ');
+    const seqLines = doc.splitTextToSize(seqText, 170);
+    doc.text(seqLines, marginX, y);
+    y += seqLines.length * 6 + 6;
+  }
+
+  if(day.note){
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    const noteLines = doc.splitTextToSize(day.note, 170);
+    doc.text(noteLines, marginX, y);
+    y += noteLines.length * 6 + 4;
+  }
+  if(day.total){
+    doc.text(`Durata totale prevista: ${day.total}`, marginX, y);
+    y += 10;
+  }
+
+  doc.setDrawColor(220, 220, 220);
+  doc.line(marginX, y, 190, y);
+  y += 12;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Scheda da compilare', marginX, y);
+  y += 10;
+
+  const fields = ['Data', 'Ora di partenza', 'Tempo effettivo', 'Sensazioni (1-10)', 'Note'];
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  fields.forEach(f => {
+    doc.text(`${f}:`, marginX, y);
+    doc.setDrawColor(180, 180, 180);
+    doc.line(marginX + 42, y, 190, y);
+    y += 14;
+  });
+
+  doc.save(`${day.name}-settimana${weekIdx + 1}.pdf`);
+}
+
+function renderMotivation(){
+  const el = document.getElementById('motivateText');
+  const today = new Date();
+  const dow = today.getDay(); // 0 = domenica ... 6 = sabato
+
+  if(dow === 1){
+    el.textContent = "Oggi è lunedì: il momento perfetto per partire. Si comincia!";
+  } else {
+    const daysUntil = (8 - dow) % 7;
+    const plural = daysUntil === 1 ? 'giorno' : 'giorni';
+    el.textContent = `Il modo migliore per allenarsi bene è iniziare con la settimana intera davanti. Usa questi ${daysUntil} ${plural} per prepararti, e parti lunedì prossimo con la mente libera.`;
+  }
+}
+
 // Determina automaticamente la settimana del ciclo in base alla settimana dell'anno,
 // così il ciclo di 4 settimane si ripete da solo senza doverlo scegliere ogni volta.
 (function autoSelectWeek(){
@@ -482,6 +584,7 @@ function initChecklist(){
 renderWeekTabs();
 renderDays();
 renderExercises();
+renderMotivation();
 </script>
 
 </body>
