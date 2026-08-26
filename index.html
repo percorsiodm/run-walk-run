@@ -411,8 +411,8 @@ function renderDays(){
     const dayKey = `w${currentWeek}-${day.name}`;
     const completedDate = getCompletion(dayKey);
     const completeHtml = completedDate
-      ? `<button class="complete-btn done" type="button">✓ ${formatDate(completedDate)}</button>`
-      : `<button class="complete-btn" type="button">Segna fatto</button>`;
+      ? `<button class="complete-btn done" type="button">Completato il ${formatDate(completedDate)}</button>`
+      : `<button class="complete-btn" type="button">Completare</button>`;
 
     el.innerHTML = `
       <button class="day-head" type="button">
@@ -589,7 +589,7 @@ function toggleCompletion(dayKey){
 
 function formatDate(isoDate){
   const [yyyy, mm, dd] = isoDate.split('-');
-  return `${dd}/${mm}/${yyyy}`;
+  return `${dd}-${mm}-${yyyy.slice(2)}`;
 }
 
 function renderMotivation(){
