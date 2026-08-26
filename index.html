@@ -229,14 +229,13 @@
     <div class="day open">
       <div class="day-body" style="max-height:900px;">
         <div class="day-body-inner">
-          <p class="note" style="margin-top:0;">Riscaldamento: 3-4' di mobilità articolare (spalle, anche, caviglie).</p>
           <ul class="exlist" id="exList"></ul>
         </div>
       </div>
     </div>
 
     <div class="swap-note">
-      <strong>Regola di scambio.</strong> Fai gli esercizi solo in uno dei due giorni, martedì o giovedì — l'altro resta riposo puro. Se le gambe sono ancora pesanti dalla corsa precedente, salta squat e ponte glutei e fai solo plank e stretching.
+      <strong>Regola di scambio.</strong> Fai gli esercizi solo in uno dei due giorni, martedì o giovedì — l'altro resta riposo puro. Se le gambe sono ancora pesanti dalla corsa precedente, salta squat e ponte glutei e fai solo plank e il riscaldamento veloce.
     </div>
   </section>
 
@@ -263,7 +262,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Sali da 3' a 5' di corsa e ridiscendi, cammino sempre a 2'.", total:"~48 minuti" },
     { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
-      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+      note:"Riposo o camminata leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
     { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","5' defaticamento"]],
       note:"2' cammino / 5' corsa ripetuti × 5 giri.", total:"~45 minuti" },
@@ -283,7 +282,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"La piramide sale fino a 6' di corsa questa settimana.", total:"~54 minuti" },
     { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
-      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+      note:"Riposo o camminata leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
     { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","5' defaticamento"]],
       note:"2' cammino / 6' corsa ripetuti × 5 giri.", total:"~50 minuti" },
@@ -303,7 +302,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"Piramide più corta ma più intensa, parte già da 4' di corsa.", total:"~52 minuti" },
     { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
-      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+      note:"Riposo o camminata leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
     { name:"Venerdì", tag:"Resistenza", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","5' defaticamento"]],
       note:"2' cammino / 6' corsa ripetuti × 5 giri.", total:"~50 minuti" },
@@ -323,7 +322,7 @@ const WEEKS = [
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Niente piramide questa settimana, solo intervalli semplici e regolari.", total:"~35 minuti" },
     { name:"Giovedì", tag:"Riposo", tagClass:"riposo", segments:[],
-      note:"Riposo o bici leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
+      note:"Riposo o camminata leggera 20-30' — oppure esercizi, se non li hai fatti martedì.", total:"" },
     { name:"Venerdì", tag:"Facile", tagClass:"facile",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"2' cammino / 4' corsa × 5 giri, senza spingere.", total:"~40 minuti" },
@@ -335,18 +334,20 @@ const WEEKS = [
 ];
 
 const EXERCISES = [
-  { key:"plank", name:"Plank", video:"https://www.youtube.com/watch?v=uefcn2Enyas",
+  { key:"riscaldamento", name:"Riscaldamento veloce", video:"https://www.youtube.com/shorts/kN2j_xPJ34U",
+    detail:["3-4' prima di iniziare","3-4' prima di iniziare","3-4' prima di iniziare","4-5', con calma"] },
+  { key:"plank", name:"Plank", video:"https://www.youtube.com/shorts/JM7HRRU8-jk",
     detail:["20-30 secondi × 3, schiena piatta","30-40 secondi × 3","40-50 secondi × 3","20 secondi × 2, solo mantenimento"] },
-  { key:"flessioni", name:"Flessioni", video:"https://www.youtube.com/watch?v=b0Xhc1aN5jQ",
-    detail:["sulle ginocchia o inclinate, 8-10 rip. × 3","10-12 rip. × 3","12-15 rip. × 3","6-8 rip. × 2"] },
-  { key:"squat", name:"Squat a corpo libero", video:"https://www.youtube.com/watch?v=O3q4X0apJuo",
+  { key:"flessioni", name:"Flessioni normali", video:"https://www.youtube.com/shorts/ShPdy4oslNc",
+    detail:["6-8 rip. × 3","8-10 rip. × 3","10-12 rip. × 4","5-6 rip. × 2"] },
+  { key:"flessioni-ginocchia", name:"Flessioni sulle ginocchia", video:"https://www.youtube.com/shorts/W0GFFzyYUWI",
+    detail:["8-10 rip. × 3, se le normali sono ancora dure","10-12 rip. × 3","12-15 rip. × 3","6-8 rip. × 2"] },
+  { key:"squat", name:"Squat a corpo libero", video:"https://www.youtube.com/shorts/8VPkT0YTLHI",
     detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
-  { key:"ponte", name:"Ponte glutei", video:"https://www.youtube.com/watch?v=EJBpPCQQPhs",
+  { key:"ponte", name:"Ponte glutei", video:"https://www.youtube.com/shorts/ekp_416qE0I",
     detail:["12-15 rip. × 3","15-18 rip. × 3","18-20 rip. × 4","10-12 rip. × 2"] },
-  { key:"sideplank", name:"Side plank", video:"https://www.youtube.com/watch?v=LqZwLDnPvsA",
-    detail:["15-20 secondi per lato × 2","20-25 secondi per lato × 2","25-30 secondi per lato × 3","15 secondi per lato × 2"] },
-  { key:"stretch", name:"Stretching finale", video:"https://www.youtube.com/watch?v=D5HlM0P8CgM",
-    detail:["5' su quadricipiti, polpacci, lombari","5' su quadricipiti, polpacci, lombari","6' su quadricipiti, polpacci, lombari","8', più mobilità che allungamento, senza fretta"] }
+  { key:"sideplank", name:"Side plank", video:"https://www.youtube.com/shorts/sJwYvq2UiQ4",
+    detail:["15-20 secondi per lato × 2","20-25 secondi per lato × 2","25-30 secondi per lato × 3","15 secondi per lato × 2"] }
 ];
 
 let currentWeek = 0;
@@ -403,7 +404,13 @@ function renderDays(){
       </div>
     `;
     el.querySelector('.day-head').addEventListener('click', () => {
-      el.classList.toggle('open');
+      if(day.tagClass === 'esercizi'){
+        const target = document.getElementById('esercizi');
+        target.querySelector('.day').classList.add('open');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        el.classList.toggle('open');
+      }
     });
     list.appendChild(el);
   });
