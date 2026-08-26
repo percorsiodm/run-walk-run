@@ -386,12 +386,10 @@ function renderDays(){
   const list = document.getElementById('dayList');
   list.innerHTML = '';
   const days = WEEKS[currentWeek];
-  const todayIdx = (new Date().getDay() + 6) % 7;
 
   days.forEach((day, i) => {
     const el = document.createElement('div');
     el.className = 'day';
-    if(i === todayIdx) el.classList.add('open');
 
     const segHtml = day.segments.length
       ? `<div class="seq">${day.segments.map(([type,label]) =>
@@ -536,25 +534,6 @@ function generateDayPdf(day, weekIdx){
     y += 10;
   }
 
-  doc.setDrawColor(220, 220, 220);
-  doc.line(marginX, y, 190, y);
-  y += 12;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('Scheda da compilare', marginX, y);
-  y += 10;
-
-  const fields = ['Data', 'Ora di partenza', 'Tempo effettivo', 'Sensazioni (1-10)', 'Note'];
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  fields.forEach(f => {
-    doc.text(`${f}:`, marginX, y);
-    doc.setDrawColor(180, 180, 180);
-    doc.line(marginX + 42, y, 190, y);
-    y += 14;
-  });
-
   doc.save(`${day.name}-settimana${weekIdx + 1}.pdf`);
 }
 
@@ -571,15 +550,6 @@ function renderMotivation(){
     el.textContent = `Il modo migliore per allenarsi bene è iniziare con la settimana intera davanti. Usa questi ${daysUntil} ${plural} per prepararti, e parti lunedì prossimo con la mente libera.`;
   }
 }
-
-// Determina automaticamente la settimana del ciclo in base alla settimana dell'anno,
-// così il ciclo di 4 settimane si ripete da solo senza doverlo scegliere ogni volta.
-(function autoSelectWeek(){
-  const today = new Date();
-  const firstDay = new Date(today.getFullYear(), 0, 1);
-  const isoWeek = Math.ceil((((today - firstDay) / 86400000) + firstDay.getDay() + 1) / 7);
-  currentWeek = (isoWeek - 1) % 4;
-})();
 
 renderWeekTabs();
 renderDays();
