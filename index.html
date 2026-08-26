@@ -89,6 +89,15 @@
   }
   .pdf-btn:hover{background:var(--sand);}
 
+  .complete-btn{
+    flex-shrink:0; font-size:11px; font-weight:600; letter-spacing:0.02em;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+    background:var(--sand-2); color:var(--ink-soft); border:none; cursor:pointer;
+    font-family:inherit;
+  }
+  .complete-btn:hover{background:var(--sand);}
+  .complete-btn.done{background:#E4EEDD; color:var(--sage-2);}
+
   svg.dial{flex-shrink:0;}
 
   section{margin-top:40px;}
@@ -399,10 +408,17 @@ function renderDays(){
     const showPdf = day.name !== 'Martedì' && day.name !== 'Giovedì';
     const pdfHtml = showPdf ? `<button class="pdf-btn" type="button">PDF ↓</button>` : '';
 
+    const dayKey = `w${currentWeek}-${day.name}`;
+    const completedDate = getCompletion(dayKey);
+    const completeHtml = completedDate
+      ? `<button class="complete-btn done" type="button">✓ ${formatDate(completedDate)}</button>`
+      : `<button class="complete-btn" type="button">Segna fatto</button>`;
+
     el.innerHTML = `
       <button class="day-head" type="button">
         <span class="name">${day.name}</span>
         <span class="meta">
+          ${completeHtml}
           ${pdfHtml}
           <span class="tag ${day.tagClass}">${day.tag}</span>
           <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -416,6 +432,11 @@ function renderDays(){
         </div>
       </div>
     `;
+    el.querySelector('.complete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCompletion(dayKey);
+      renderDays();
+    });
     if(showPdf){
       el.querySelector('.pdf-btn').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -535,6 +556,40 @@ function generateDayPdf(day, weekIdx){
   }
 
   doc.save(`${day.name}-settimana${weekIdx + 1}.pdf`);
+}
+
+function getCompletions(){
+  try{
+    return JSON.parse(localStorage.getItem('rwr-completions') || '{}');
+  }catch(e){
+    return {};
+  }
+}
+
+function getCompletion(dayKey){
+  const completions = getCompletions();
+  return completions[dayKey] || null;
+}
+
+function toggleCompletion(dayKey){
+  const completions = getCompletions();
+  if(completions[dayKey]){
+    delete completions[dayKey];
+  } else {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    completions[dayKey] = `${yyyy}-${mm}-${dd}`;
+  }
+  try{
+    localStorage.setItem('rwr-completions', JSON.stringify(completions));
+  }catch(e){}
+}
+
+function formatDate(isoDate){
+  const [yyyy, mm, dd] = isoDate.split('-');
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 function renderMotivation(){
