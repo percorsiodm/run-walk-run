@@ -420,7 +420,7 @@ function renderDays(){
     const dayKey = `w${currentWeek}-${day.name}`;
     const completedDate = getCompletion(dayKey);
 
-    const showSession = dayKey === 'w0-Lunedì'; // TEST: solo lunedì settimana 1
+    const showSession = day.name !== 'Martedì' && day.name !== 'Giovedì';
 
     let completeHtml;
     if(isEsercizi){
@@ -570,7 +570,7 @@ function formatDate(isoDate){
   return `${dd}-${mm}-${yyyy.slice(2)}`;
 }
 
-// ===== Sessione GPS (test: solo w0-Lunedì) =====
+// ===== Sessione allenamento con GPS (tutti i giorni di corsa) =====
 let activeSession = null; // { dayKey, watchId, timerId, startTime, distanceKm, lastCoord }
 
 function getSessions(){
@@ -661,7 +661,7 @@ function renderSessionBox(dayKey){
     return;
   }
 
-  box.innerHTML = `<button class="session-btn" type="button">▶ Avvia sessione GPS</button>`;
+  box.innerHTML = `<button class="session-btn" type="button">▶ Avvia Sessione Allenamento</button>`;
   box.querySelector('.session-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     startSession(dayKey);
