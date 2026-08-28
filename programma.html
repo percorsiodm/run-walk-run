@@ -465,9 +465,6 @@ function renderDays(){
         generateDayPdf(day, currentWeek);
       });
     }
-    if(showSession){
-      renderSessionBox(dayKey);
-    }
     el.querySelector('.day-head').addEventListener('click', () => {
       if(isEsercizi){
         window.location.href = `esercizi.html?week=${currentWeek}`;
@@ -476,6 +473,9 @@ function renderDays(){
       }
     });
     list.appendChild(el);
+    if(showSession){
+      renderSessionBox(dayKey);
+    }
   });
 }
 
