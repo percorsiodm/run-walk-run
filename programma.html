@@ -218,6 +218,16 @@
   }
   .session-saved strong{color:var(--ink);}
   .session-gps-status{font-size:12px; color:var(--ink-soft); margin-bottom:10px;}
+
+  .go-btn{
+    font-size:16px; font-weight:800; letter-spacing:0.04em;
+    padding:14px 32px; border-radius:100px; border:none;
+    font-family:'Archivo Expanded', sans-serif;
+    background:var(--sand-2); color:var(--ink-soft); cursor:not-allowed;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .go-btn.ready{background:#5FA05A; color:#fff; cursor:pointer;}
+  .go-btn:disabled{opacity:0.7;}
 </style>
 </head>
 <body>
@@ -621,10 +631,32 @@ function renderSessionBox(dayKey){
   const box = document.getElementById(`sessionBox-${dayKey}`);
   if(!box) return;
 
-  if(activeSession && activeSession.dayKey === dayKey){
+  if(activeSession && activeSession.dayKey === dayKey && activeSession.status === 'locking'){
+    const ready = activeSession.locked;
+    box.innerHTML = `
+      <div class="session-gps-status">${ready ? '📍 GPS agganciato — pronto a partire' : 'Aggancio del GPS in corso… tieni il telefono all\'aperto'}</div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="go-btn ${ready ? 'ready' : ''}" type="button" ${ready ? '' : 'disabled'}>GO</button>
+        <button class="session-btn secondary" type="button" data-action="cancel">Annulla</button>
+      </div>
+    `;
+    if(ready){
+      box.querySelector('.go-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        startTimer(dayKey);
+      });
+    }
+    box.querySelector('[data-action="cancel"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelSession();
+    });
+    return;
+  }
+
+  if(activeSession && activeSession.dayKey === dayKey && activeSession.status === 'running'){
     const elapsed = Math.floor((Date.now() - activeSession.startTime) / 1000);
     box.innerHTML = `
-      <div class="session-gps-status">${activeSession.gpsOk ? '📍 GPS attivo' : 'In attesa del segnale GPS…'}</div>
+      <div class="session-gps-status">📍 GPS attivo</div>
       <div class="session-live">
         <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo</span></div>
         <div class="metric"><span class="val">${activeSession.distanceKm.toFixed(2)} km</span><span class="lbl">Distanza</span></div>
@@ -678,25 +710,57 @@ function startSession(dayKey){
     return;
   }
 
-  activeSession = { dayKey, watchId: null, timerId: null, startTime: Date.now(), distanceKm: 0, lastCoord: null, gpsOk: false };
+  // Soglia di precisione (metri) sotto la quale consideriamo il GPS "agganciato"
+  const ACCURACY_THRESHOLD_M = 20;
+
+  activeSession = {
+    dayKey, watchId: null, timerId: null,
+    startTime: null, distanceKm: 0, lastCoord: null,
+    gpsOk: false, locked: false, status: 'locking'
+  };
 
   activeSession.watchId = navigator.geolocation.watchPosition((pos) => {
     activeSession.gpsOk = true;
-    const { latitude, longitude } = pos.coords;
-    if(activeSession.lastCoord){
+    const { latitude, longitude, accuracy } = pos.coords;
+
+    if(activeSession.status === 'running' && activeSession.lastCoord){
       activeSession.distanceKm += haversineKm(activeSession.lastCoord.lat, activeSession.lastCoord.lon, latitude, longitude);
     }
     activeSession.lastCoord = { lat: latitude, lon: longitude };
+
+    if(activeSession.status === 'locking'){
+      const wasLocked = activeSession.locked;
+      activeSession.locked = (accuracy != null && accuracy <= ACCURACY_THRESHOLD_M);
+      if(activeSession.locked !== wasLocked){
+        renderSessionBox(dayKey);
+      }
+    }
   }, (err) => {
     console.warn('Errore GPS:', err.message);
   }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
 
+  renderSessionBox(dayKey);
+}
+
+function startTimer(dayKey){
+  if(!activeSession || activeSession.dayKey !== dayKey || !activeSession.locked) return;
+  activeSession.status = 'running';
+  activeSession.startTime = Date.now();
   activeSession.timerId = setInterval(() => renderSessionBox(dayKey), 1000);
   renderSessionBox(dayKey);
 }
 
-function stopSession(){
+function cancelSession(){
   if(!activeSession) return;
+  if(activeSession.watchId !== null) navigator.geolocation.clearWatch(activeSession.watchId);
+  if(activeSession.timerId !== null) clearInterval(activeSession.timerId);
+  const dayKey = activeSession.dayKey;
+  activeSession = null;
+  renderSessionBox(dayKey);
+}
+
+function stopSession(){
+  if(!activeSession || activeSession.status !== 'running') return;
   const { dayKey, watchId, timerId, startTime, distanceKm } = activeSession;
 
   if(watchId !== null) navigator.geolocation.clearWatch(watchId);
