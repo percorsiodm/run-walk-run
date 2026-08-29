@@ -243,7 +243,7 @@
     line-height:1;
   }
   .phase-box .phase-next{font-size:12px; color:var(--ink-soft); margin-top:8px;}
-  .phase-meta{display:flex; justify-content:center; gap:26px; margin:14px 0;}
+  .phase-meta{display:flex; justify-content:center; gap:20px; margin:14px 0; flex-wrap:wrap;}
   .phase-meta .metric{text-align:center;}
   .phase-meta .metric .val{font-family:'Archivo Expanded'; font-weight:700; font-size:16px; color:var(--ink); display:block;}
   .phase-meta .metric .lbl{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;}
@@ -718,7 +718,8 @@ function renderSessionBox(dayKey){
           ${nextPhase ? `<p class="phase-next">Poi: ${nextPhase.name}</p>` : `<p class="phase-next">Ultima fase</p>`}
         </div>
         <div class="phase-meta">
-          <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo totale</span></div>
+          ${activeSession.totalPlannedLabel ? `<div class="metric"><span class="val">${activeSession.totalPlannedLabel}</span><span class="lbl">Durata prevista</span></div>` : ''}
+          <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo trascorso</span></div>
           <div class="metric"><span class="val">${activeSession.distanceKm.toFixed(2)} km</span><span class="lbl">Distanza</span></div>
         </div>
         <div style="text-align:center;">
@@ -889,6 +890,7 @@ function startTimer(dayKey){
   if(!activeSession || activeSession.dayKey !== dayKey || !activeSession.locked) return;
   const day = findDay(dayKey);
   activeSession.phases = parsePhases(day);
+  activeSession.totalPlannedLabel = (day && day.total) ? day.total : '';
   activeSession.phaseIdx = null;
   activeSession.warned10 = false;
   activeSession.lastCountdownSpoken = null;
