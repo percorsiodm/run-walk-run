@@ -687,8 +687,28 @@ function renderSessionBox(dayKey){
       const { phase, remaining, nextPhase, phaseIdx } = phaseInfo;
 
       if(activeSession.phaseIdx !== phaseIdx){
-        if(activeSession.phaseIdx !== null){ playBeep(); vibrate(); }
+        const isFirst = activeSession.phaseIdx === null;
+        if(!isFirst){ playBeep(); vibrate(); }
+        speakPhase(phase, isFirst);
         activeSession.phaseIdx = phaseIdx;
+        activeSession.warned10 = false;
+        activeSession.lastCountdownSpoken = null;
+      }
+
+      if(remaining === 10 && !activeSession.warned10){
+        if(nextPhase){
+          const nextMinutes = Math.round(nextPhase.seconds / 60);
+          const nextNameLower = nextPhase.name.toLowerCase();
+          speakText(`Tra 10 secondi inizia il prossimo step: ${nextMinutes} minuti di ${nextNameLower}.`);
+        } else {
+          speakText('Tra 10 secondi finisce l\'allenamento.');
+        }
+        activeSession.warned10 = true;
+      }
+
+      if(remaining <= 5 && remaining >= 1 && activeSession.lastCountdownSpoken !== remaining){
+        speakText(String(remaining));
+        activeSession.lastCountdownSpoken = remaining;
       }
 
       box.innerHTML = `
@@ -847,11 +867,31 @@ function vibrate(){
   if(navigator.vibrate) navigator.vibrate(200);
 }
 
+function speakText(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel(); // evita sovrapposizioni con annunci precedenti
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'it-IT';
+    utter.rate = 1;
+    window.speechSynthesis.speak(utter);
+  }catch(e){}
+}
+
+function speakPhase(phase, isFirst){
+  const minutes = Math.round(phase.seconds / 60);
+  const nameLower = phase.name.toLowerCase();
+  const stepText = minutes > 0 ? `Vai con ${minutes} minuti di ${nameLower}!` : `Vai con ${nameLower}!`;
+  speakText(isFirst ? `Si parte! ${stepText}` : stepText);
+}
+
 function startTimer(dayKey){
   if(!activeSession || activeSession.dayKey !== dayKey || !activeSession.locked) return;
   const day = findDay(dayKey);
   activeSession.phases = parsePhases(day);
   activeSession.phaseIdx = null;
+  activeSession.warned10 = false;
+  activeSession.lastCountdownSpoken = null;
   activeSession.status = 'running';
   activeSession.startTime = Date.now();
   activeSession.timerId = setInterval(() => renderSessionBox(dayKey), 1000);
@@ -869,13 +909,16 @@ function cancelSession(){
 
 function stopSession(){
   if(!activeSession || activeSession.status !== 'running') return;
-  const { dayKey, watchId, timerId, startTime, distanceKm } = activeSession;
+  const { dayKey, watchId, timerId, startTime, distanceKm, phases } = activeSession;
 
   if(watchId !== null) navigator.geolocation.clearWatch(watchId);
   clearInterval(timerId);
   const durationSec = Math.floor((Date.now() - startTime) / 1000);
 
   saveSessionData(dayKey, distanceKm, durationSec);
+  if(phases && phases.length){
+    speakText('Allenamento completato. Ottimo lavoro!');
+  }
   activeSession = null;
   renderDays();
 }
