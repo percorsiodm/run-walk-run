@@ -228,6 +228,25 @@
   }
   .go-btn.ready{background:#5FA05A; color:#fff; cursor:pointer;}
   .go-btn:disabled{opacity:0.7;}
+
+  .phase-box{
+    text-align:center; padding:6px 0 14px;
+  }
+  .phase-box .phase-type{
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+    padding:4px 12px; border-radius:20px; display:inline-block; margin-bottom:10px;
+  }
+  .phase-box .phase-type.walk{background:var(--sand-2); color:var(--ink-soft);}
+  .phase-box .phase-type.run{background:#F5E6D3; color:var(--amber-2);}
+  .phase-box .phase-countdown{
+    font-family:'Archivo Expanded'; font-weight:800; font-size:44px; color:var(--pine);
+    line-height:1;
+  }
+  .phase-box .phase-next{font-size:12px; color:var(--ink-soft); margin-top:8px;}
+  .phase-meta{display:flex; justify-content:center; gap:26px; margin:14px 0;}
+  .phase-meta .metric{text-align:center;}
+  .phase-meta .metric .val{font-family:'Archivo Expanded'; font-weight:700; font-size:16px; color:var(--ink); display:block;}
+  .phase-meta .metric .lbl{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;}
 </style>
 </head>
 <body>
@@ -655,14 +674,48 @@ function renderSessionBox(dayKey){
 
   if(activeSession && activeSession.dayKey === dayKey && activeSession.status === 'running'){
     const elapsed = Math.floor((Date.now() - activeSession.startTime) / 1000);
-    box.innerHTML = `
-      <div class="session-gps-status">📍 GPS attivo</div>
-      <div class="session-live">
-        <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo</span></div>
-        <div class="metric"><span class="val">${activeSession.distanceKm.toFixed(2)} km</span><span class="lbl">Distanza</span></div>
-      </div>
-      <button class="session-btn stop" type="button">Termina sessione</button>
-    `;
+
+    if(activeSession.phases.length){
+      const phaseInfo = getCurrentPhase(activeSession.phases, elapsed);
+
+      if(!phaseInfo){
+        // Sequenza terminata: la sessione si ferma da sola
+        stopSession();
+        return;
+      }
+
+      const { phase, remaining, nextPhase, phaseIdx } = phaseInfo;
+
+      if(activeSession.phaseIdx !== phaseIdx){
+        if(activeSession.phaseIdx !== null){ playBeep(); vibrate(); }
+        activeSession.phaseIdx = phaseIdx;
+      }
+
+      box.innerHTML = `
+        <div class="phase-box">
+          <span class="phase-type ${phase.type}">${phase.name}</span>
+          <div class="phase-countdown">${formatDuration(remaining)}</div>
+          ${nextPhase ? `<p class="phase-next">Poi: ${nextPhase.name}</p>` : `<p class="phase-next">Ultima fase</p>`}
+        </div>
+        <div class="phase-meta">
+          <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo totale</span></div>
+          <div class="metric"><span class="val">${activeSession.distanceKm.toFixed(2)} km</span><span class="lbl">Distanza</span></div>
+        </div>
+        <div style="text-align:center;">
+          <button class="session-btn stop" type="button">Termina sessione</button>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div class="session-gps-status">📍 GPS attivo</div>
+        <div class="session-live">
+          <div class="metric"><span class="val">${formatDuration(elapsed)}</span><span class="lbl">Tempo</span></div>
+          <div class="metric"><span class="val">${activeSession.distanceKm.toFixed(2)} km</span><span class="lbl">Distanza</span></div>
+        </div>
+        <button class="session-btn stop" type="button">Termina sessione</button>
+      `;
+    }
+
     box.querySelector('.session-btn.stop').addEventListener('click', (e) => {
       e.stopPropagation();
       stopSession();
@@ -742,8 +795,63 @@ function startSession(dayKey){
   renderSessionBox(dayKey);
 }
 
+function findDay(dayKey){
+  const [wPart, ...nameParts] = dayKey.split('-');
+  const weekIdx = parseInt(wPart.replace('w', ''), 10);
+  const dayName = nameParts.join('-');
+  return WEEKS[weekIdx] ? WEEKS[weekIdx].find(d => d.name === dayName) : null;
+}
+
+function parsePhases(day){
+  if(!day || !day.segments || !day.segments.length) return [];
+  let acc = 0;
+  return day.segments.map(([type, label]) => {
+    const match = label.match(/(\d+)'/);
+    const minutes = match ? parseInt(match[1], 10) : 0;
+    let name;
+    if(label.includes('riscaldamento')) name = 'Riscaldamento';
+    else if(label.includes('defaticamento')) name = 'Defaticamento';
+    else if(type === 'walk') name = 'Cammino';
+    else name = 'Corsa';
+    acc += minutes * 60;
+    return { name, type, seconds: minutes * 60, cumEnd: acc };
+  });
+}
+
+function getCurrentPhase(phases, elapsed){
+  const idx = phases.findIndex(p => elapsed < p.cumEnd);
+  if(idx === -1) return null; // sequenza finita
+  const phase = phases[idx];
+  const prevEnd = idx > 0 ? phases[idx - 1].cumEnd : 0;
+  const remaining = phase.cumEnd - elapsed;
+  const nextPhase = phases[idx + 1] || null;
+  return { phase, remaining, nextPhase, phaseIdx: idx };
+}
+
+function playBeep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.18);
+    osc.onended = () => ctx.close();
+  }catch(e){}
+}
+
+function vibrate(){
+  if(navigator.vibrate) navigator.vibrate(200);
+}
+
 function startTimer(dayKey){
   if(!activeSession || activeSession.dayKey !== dayKey || !activeSession.locked) return;
+  const day = findDay(dayKey);
+  activeSession.phases = parsePhases(day);
+  activeSession.phaseIdx = null;
   activeSession.status = 'running';
   activeSession.startTime = Date.now();
   activeSession.timerId = setInterval(() => renderSessionBox(dayKey), 1000);
