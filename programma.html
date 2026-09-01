@@ -447,6 +447,7 @@ function renderDays(){
     const pdfHtml = showPdf ? `<button class="pdf-btn" type="button">PDF ↓</button>` : '';
 
     const dayKey = `w${currentWeek}-${day.name}`;
+    el.dataset.dayKey = dayKey;
     const completedDate = getCompletion(dayKey);
 
     const showSession = day.name !== 'Martedì' && day.name !== 'Giovedì';
@@ -741,6 +742,7 @@ function renderSessionBox(dayKey){
       e.stopPropagation();
       stopSession();
     });
+    saveActiveSessionSnapshot();
     return;
   }
 
@@ -772,6 +774,81 @@ function renderSessionBox(dayKey){
     e.stopPropagation();
     startSession(dayKey);
   });
+}
+
+function saveActiveSessionSnapshot(){
+  if(!activeSession || activeSession.status !== 'running') return;
+  const snap = {
+    dayKey: activeSession.dayKey,
+    status: activeSession.status,
+    startTime: activeSession.startTime,
+    distanceKm: activeSession.distanceKm,
+    lastCoord: activeSession.lastCoord,
+    totalPlannedLabel: activeSession.totalPlannedLabel,
+    phaseIdx: activeSession.phaseIdx,
+    warned10: activeSession.warned10,
+    lastCountdownSpoken: activeSession.lastCountdownSpoken
+  };
+  try{ localStorage.setItem('rwr-active-session', JSON.stringify(snap)); }catch(e){}
+}
+
+function loadActiveSessionSnapshot(){
+  try{
+    const raw = localStorage.getItem('rwr-active-session');
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){
+    return null;
+  }
+}
+
+function clearActiveSessionSnapshot(){
+  try{ localStorage.removeItem('rwr-active-session'); }catch(e){}
+}
+
+function resumeActiveSession(){
+  const snap = loadActiveSessionSnapshot();
+  if(!snap || snap.status !== 'running') return false;
+
+  const day = findDay(snap.dayKey);
+  if(!day){ clearActiveSessionSnapshot(); return false; }
+
+  activeSession = {
+    dayKey: snap.dayKey, watchId: null, timerId: null,
+    startTime: snap.startTime, distanceKm: snap.distanceKm || 0,
+    lastCoord: snap.lastCoord || null, gpsOk: true, locked: true,
+    status: 'running',
+    phases: parsePhases(day),
+    totalPlannedLabel: snap.totalPlannedLabel || (day.total || ''),
+    phaseIdx: (snap.phaseIdx !== undefined) ? snap.phaseIdx : null,
+    warned10: !!snap.warned10,
+    lastCountdownSpoken: (snap.lastCountdownSpoken !== undefined) ? snap.lastCountdownSpoken : null
+  };
+
+  const weekMatch = snap.dayKey.match(/^w(\d+)-/);
+  if(weekMatch) currentWeek = parseInt(weekMatch[1], 10);
+
+  renderWeekTabs();
+  renderDays();
+
+  const dayEl = document.querySelector(`.day[data-day-key="${snap.dayKey}"]`);
+  if(dayEl) dayEl.classList.add('open');
+
+  if(navigator.geolocation){
+    activeSession.watchId = navigator.geolocation.watchPosition((pos) => {
+      activeSession.gpsOk = true;
+      const { latitude, longitude } = pos.coords;
+      if(activeSession.lastCoord){
+        activeSession.distanceKm += haversineKm(activeSession.lastCoord.lat, activeSession.lastCoord.lon, latitude, longitude);
+      }
+      activeSession.lastCoord = { lat: latitude, lon: longitude };
+    }, (err) => {
+      console.warn('Errore GPS:', err.message);
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+  }
+
+  activeSession.timerId = setInterval(() => renderSessionBox(snap.dayKey), 1000);
+  renderSessionBox(snap.dayKey);
+  return true;
 }
 
 function startSession(dayKey){
@@ -906,6 +983,7 @@ function cancelSession(){
   if(activeSession.timerId !== null) clearInterval(activeSession.timerId);
   const dayKey = activeSession.dayKey;
   activeSession = null;
+  clearActiveSessionSnapshot();
   renderSessionBox(dayKey);
 }
 
@@ -922,6 +1000,7 @@ function stopSession(){
     speakText('Allenamento completato. Ottimo lavoro!');
   }
   activeSession = null;
+  clearActiveSessionSnapshot();
   renderDays();
 }
 
@@ -939,8 +1018,11 @@ function renderMotivation(){
   }
 }
 
-renderWeekTabs();
-renderDays();
+const wasResumed = resumeActiveSession();
+if(!wasResumed){
+  renderWeekTabs();
+  renderDays();
+}
 renderMotivation();
 </script>
 
