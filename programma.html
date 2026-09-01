@@ -602,6 +602,32 @@ function formatDate(isoDate){
 
 // ===== Sessione allenamento con GPS (tutti i giorni di corsa) =====
 let activeSession = null; // { dayKey, watchId, timerId, startTime, distanceKm, lastCoord }
+let wakeLock = null;
+
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try{
+    wakeLock = await navigator.wakeLock.request('screen');
+  }catch(e){
+    console.warn('Wake Lock non disponibile:', e.message);
+  }
+}
+
+async function releaseWakeLockSafe(){
+  if(wakeLock){
+    try{ await wakeLock.release(); }catch(e){}
+    wakeLock = null;
+  }
+}
+
+// Il Wake Lock viene rilasciato automaticamente dal browser quando la scheda
+// perde il focus (es. cambio app); lo richiediamo di nuovo appena si torna
+// visibili, se una sessione è ancora in corso.
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && activeSession && activeSession.status === 'running'){
+    requestWakeLock();
+  }
+});
 
 function getSessions(){
   try{
@@ -846,6 +872,7 @@ function resumeActiveSession(){
     }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
   }
 
+  requestWakeLock();
   activeSession.timerId = setInterval(() => renderSessionBox(snap.dayKey), 1000);
   renderSessionBox(snap.dayKey);
   return true;
@@ -973,6 +1000,7 @@ function startTimer(dayKey){
   activeSession.lastCountdownSpoken = null;
   activeSession.status = 'running';
   activeSession.startTime = Date.now();
+  requestWakeLock();
   activeSession.timerId = setInterval(() => renderSessionBox(dayKey), 1000);
   renderSessionBox(dayKey);
 }
@@ -984,6 +1012,7 @@ function cancelSession(){
   const dayKey = activeSession.dayKey;
   activeSession = null;
   clearActiveSessionSnapshot();
+  releaseWakeLockSafe();
   renderSessionBox(dayKey);
 }
 
@@ -1001,6 +1030,7 @@ function stopSession(){
   }
   activeSession = null;
   clearActiveSessionSnapshot();
+  releaseWakeLockSafe();
   renderDays();
 }
 
