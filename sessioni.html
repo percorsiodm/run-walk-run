@@ -146,7 +146,7 @@
   .tag.resistenza{background:#FBD0BC; color:#B23E14;}
   .tag.esercizi{background:#DDE3F5; color:#33448C;}
   .tag.riposo{background:var(--sand-2); color:var(--ink-soft);}
-  .tag.sacro{background:var(--pine); color:var(--sand);}
+  .tag.sacro{background:var(--amber); color:#fff;}
 
   .chevron{width:18px; height:18px; transition:transform 0.2s ease; flex-shrink:0; color:var(--ink-soft);}
   .day.open .chevron{transform:rotate(180deg);}
@@ -311,7 +311,7 @@ const WEEKS = [
     { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Il giorno più lungo della settimana, stessa piramide di mercoledì ma con due giri al top.", total:"~53 minuti" },
-    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+    { name:"Domenica", tag:"Riposo completo", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
   ],
   // Settimana 2 — Costruzione
   [
@@ -331,7 +331,7 @@ const WEEKS = [
     { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Il giorno lungo della settimana, due giri al top di 6'.", total:"~62 minuti" },
-    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+    { name:"Domenica", tag:"Riposo completo", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
   ],
   // Settimana 3 — Picco
   [
@@ -351,7 +351,7 @@ const WEEKS = [
     { name:"Sabato", tag:"Piramide lunga", tagClass:"resistenza",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","4'"],["walk","2'"],["run","5'"],["walk","2'"],["run","6'"],["walk","2'"],["run","7'"],["walk","2'"],["run","6'"],["walk","2'"],["run","5'"],["walk","2'"],["run","4'"],["walk","5' defaticamento"]],
       note:"Il picco del ciclo: si arriva a 7' di corsa continua.", total:"~63 minuti" },
-    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+    { name:"Domenica", tag:"Riposo completo", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
   ],
   // Settimana 4 — Scarico
   [
@@ -371,7 +371,7 @@ const WEEKS = [
     { name:"Sabato", tag:"Facile lungo", tagClass:"facile",
       segments:[["walk","5' riscaldamento"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","2'"],["run","3'"],["walk","5' defaticamento"]],
       note:"Un po' più lungo ma sempre a ritmo facile, per chiudere il ciclo riposati.", total:"~45 minuti" },
-    { name:"Domenica", tag:"Sacra", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
+    { name:"Domenica", tag:"Riposo completo", tagClass:"sacro", segments:[], note:"Riposo totale. Non si discute.", total:"" }
   ]
 ];
 
@@ -405,24 +405,25 @@ function renderDays(){
     el.className = 'day';
 
     const isEsercizi = day.tagClass === 'esercizi';
+    const isRestDay = day.name === 'Domenica';
 
     const segHtml = day.segments.length
       ? `<div class="seq">${day.segments.map(([type,label]) =>
           `<span class="seg ${type}"><span class="dot"></span>${label}</span>`).join('')}</div>`
       : '';
 
-    const showPdf = day.name !== 'Martedì' && day.name !== 'Giovedì';
+    const showPdf = day.name !== 'Martedì' && day.name !== 'Giovedì' && !isRestDay;
     const pdfHtml = showPdf ? `<button class="pdf-btn" type="button">PDF ↓</button>` : '';
 
     const dayKey = `w${currentWeek}-${day.name}`;
     el.dataset.dayKey = dayKey;
     const completedDate = getCompletion(dayKey);
 
-    const showSession = day.name !== 'Martedì' && day.name !== 'Giovedì';
+    const showSession = day.name !== 'Martedì' && day.name !== 'Giovedì' && !isRestDay;
 
     let completeHtml;
-    if(isEsercizi){
-      completeHtml = completedDate
+    if(isEsercizi || isRestDay){
+      completeHtml = (isEsercizi && completedDate)
         ? `<span class="complete-badge done">Completato il ${formatDate(completedDate)}</span>`
         : '';
     } else {
@@ -450,7 +451,7 @@ function renderDays(){
         </div>
       </div>
     `;
-    if(!isEsercizi){
+    if(!isEsercizi && !isRestDay){
       el.querySelector('.complete-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         const hasSession = !!getSessions()[dayKey];
